@@ -1,17 +1,19 @@
 from django.contrib import admin
 from django.http import request
+from django.contrib.auth.models import User
 
-from .models import Users, Groups, GroupMembers, Locations, Questions, Answers
+
+from .models import Groups, GroupMembers, Locations, Questions, Answers
 from django.db.models.signals import pre_save
 from django.contrib import messages
 from django.dispatch import receiver
 
 # Register your models here.
-@admin.register(Users)
-class UsersAdmin(admin.ModelAdmin):
+"""@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
     search_fields = ['firstname', 'lastname']
     list_display = ['id', 'firstname', 'lastname']
-
+"""
 @admin.register(Groups)
 class GroupAdmin(admin.ModelAdmin):
     search_fields = ['name']
