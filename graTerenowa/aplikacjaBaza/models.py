@@ -1,5 +1,6 @@
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.contrib.auth.models import User
 
 ANSWER_STATUS = (
     ('new', 'Waiting for check'),
@@ -7,13 +8,13 @@ ANSWER_STATUS = (
     ('checked_negative', 'Answer wrong')
 )
 
-class Users(models.Model):
+"""class Users(models.Model):
     firstname = models.CharField(max_length=64)
     lastname = models.CharField(max_length=64)
 
     def __str__(self):
         return self.firstname + " " + self.lastname
-
+"""
 class Groups(models.Model):
     name = models.CharField(max_length=255)
     points = models.IntegerField(default=0)
@@ -23,7 +24,7 @@ class Groups(models.Model):
 
 class GroupMembers(models.Model):
     group = models.ForeignKey(Groups, on_delete=models.CASCADE)
-    user = models.ForeignKey(Users, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 class Locations(models.Model):
     name = models.CharField(max_length=255)
