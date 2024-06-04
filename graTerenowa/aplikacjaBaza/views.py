@@ -18,19 +18,14 @@ from rest_framework.permissions import IsAuthenticated
 class UsersViewSet(viewsets.ModelViewSet):
   #queryset=User.objects.all()
   serializer_class=UsersSerializer
+  authentication_classes = [TokenAuthentication]
+  permission_classes = [IsAuthenticated]
   queryset = User.objects.all()
   
 
-class GroupsViewSet(viewsets.ModelViewSet):
-  queryset=Groups.objects.all()
-  serializer_class=GroupsSerializer
-
-
-class GroupMembersViewSet(viewsets.ModelViewSet):
-  queryset=GroupMembers.objects.all()
-  serializer_class=GroupMembersSerializer
-
 class LocationsViewSet(viewsets.ModelViewSet):
+  authentication_classes = [TokenAuthentication]
+  permission_classes = [IsAuthenticated]
   queryset=Locations.objects.all()
   serializer_class=LocationsSerializer
 
@@ -60,11 +55,6 @@ class QuestionsViewSet(viewsets.ModelViewSet):
     serializer = QuestionsSerializer(random_question)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-class AnswersViewSet(viewsets.ModelViewSet):
-  authentication_classes = [TokenAuthentication]
-  permission_classes = [IsAuthenticated]
-  queryset=Answers.objects.all()
-  serializer_class=AnswersSerializer
 
 class LoginView(APIView):
 
