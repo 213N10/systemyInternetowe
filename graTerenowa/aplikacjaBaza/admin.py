@@ -3,32 +3,41 @@ from django.http import request
 from django.contrib.auth.models import User
 
 
-from .models import Groups, GroupMembers, Locations, Questions, Answers
+from .models import Groups, GroupMembers, Locations, Questions, Answers, UsersAnswers
 from django.db.models.signals import pre_save
 from django.contrib import messages
 from django.dispatch import receiver
 
 # Register your models here.
-"""@admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    search_fields = ['firstname', 'lastname']
-    list_display = ['id', 'firstname', 'lastname']
-"""
+
 @admin.register(Groups)
 class GroupAdmin(admin.ModelAdmin):
     search_fields = ['name']
     list_display = ['id', 'name', 'points']
 
+
+@admin.register(UsersAnswers)
+class UsersAnswersAdmin(admin.ModelAdmin):
+    search_fields = ['user__username', 'answer__question']
+    list_display = ['id', 'user', 'question', 'points']
+
+
+
+
 @admin.register(GroupMembers)
 class GroupMembersAdmin(admin.ModelAdmin):
-    search_fields = ['group__name', 'user__firstname', 'user__lastname']
-    list_display = ['group', 'user']
+    search_fields = ['group__name', 'users__firstname', 'users__lastname']
+    list_display = ['group', 'display_users']
+
+    def display_users(self,obj):
+        return ", ".join([user.username for user in obj.users.all()])
+    display_users.short_description = 'Users'
 
 @admin.register(Locations)
 class LocationsAdmin(admin.ModelAdmin):
     search_fields = ['name']
     list_display = ['id', 'name', 'latitude', 'longitude']
-
+"""
 @admin.register(Questions)
 class QuestionsAdmin(admin.ModelAdmin):
     search_fields = ['question']
@@ -39,6 +48,21 @@ class QuestionsAdmin(admin.ModelAdmin):
         return "Open Question" if obj.openQuestionMode else "Closed Question"
 
     get_open_question_mode.short_description = 'Question Mode'
+"""
+
+@admin.register(Questions)
+class QuestionsAdmin(admin.ModelAdmin):
+    list_display = ('question', 'points_for_question')
+    fieldsets = (
+        (None, {
+            'fields': ('locations', 'question', 'points_for_question')
+        }),
+        ('Odpowiedzi', {
+            'fields': ('option_1', 'option_2', 'option_3', 'option_4', 'correct_answer'),
+        }),
+    )
+
+
 
 @admin.register(Answers)
 class AnswersAdmin(admin.ModelAdmin):

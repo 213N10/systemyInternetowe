@@ -24,7 +24,7 @@ class Groups(models.Model):
 
 class GroupMembers(models.Model):
     group = models.ForeignKey(Groups, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    users = models.ManyToManyField(User)
 
 class Locations(models.Model):
     name = models.CharField(max_length=255)
@@ -36,7 +36,7 @@ class Locations(models.Model):
     def __str__(self):
         return self.name
 
-class Questions(models.Model):
+"""class Questions(models.Model):
     locations = models.ForeignKey(Locations, on_delete=models.CASCADE)
     question = models.TextField()
     openQuestionMode = models.BooleanField(default=True)
@@ -45,7 +45,23 @@ class Questions(models.Model):
     pointsForQuestion = models.IntegerField(validators=[MinValueValidator(1)], default=1)
 
     def __str__(self):
+        return self.question"""
+
+class Questions(models.Model):
+    locations = models.ForeignKey(Locations, on_delete=models.CASCADE)
+    question = models.TextField()
+    points_for_question = models.IntegerField(validators=[MinValueValidator(1)], default=1)
+    # Możliwe odpowiedzi
+    option_1 = models.CharField(max_length=255, default='')
+    option_2 = models.CharField(max_length=255, default='')
+    option_3 = models.CharField(max_length=255, default='')
+    option_4 = models.CharField(max_length=255, default='')
+    # Poprawna odpowiedź
+    correct_answer = models.CharField(max_length=1, choices=[('1', 'Option 1'), ('2', 'Option 2'), ('3', 'Option 3'), ('4', 'Option 4')], default='1')
+
+    def __str__(self):
         return self.question
+
 
 class Answers(models.Model):
     group = models.ForeignKey(Groups, on_delete=models.CASCADE)
@@ -57,3 +73,14 @@ class Answers(models.Model):
 
     def __str__(self):
         return f"{self.group.name} - {self.question.question}"
+    
+# trzymane informacje o wszystkich odpowiedziach użytkowników
+class UsersAnswers(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+    question = models.CharField(max_length=255)
+    result = models.BooleanField(default=False)
+    points = models.IntegerField(validators=[MinValueValidator(0)], default=0)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.question}"

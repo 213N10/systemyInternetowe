@@ -8,6 +8,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
+import random
+from rest_framework.decorators import action
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
 
@@ -31,10 +35,34 @@ class LocationsViewSet(viewsets.ModelViewSet):
   serializer_class=LocationsSerializer
 
 class QuestionsViewSet(viewsets.ModelViewSet):
+  authentication_classes = [TokenAuthentication]
+  permission_classes = [IsAuthenticated]
   queryset=Questions.objects.all()
   serializer_class=QuestionsSerializer
 
+  def get_queryset(self):
+    queryset= super().get_queryset()
+    locations = self.request.query_params.get('location',None)
+
+    if locations is not None:
+      queryset = queryset.filter(locations__name=locations)
+    return queryset
+  
+  @action(detail=False, methods=['get'], url_path='random', url_name='random_question')
+  def random_question(self, request):
+    #location = request.query_params.get('location',None)
+    queryset = self.get_queryset()
+
+    if not queryset.exists():
+      return Response({'error': 'No questions available'}, status=status.HTTP_404_NOT_FOUND)
+    
+    random_question = random.choice(queryset)
+    serializer = QuestionsSerializer(random_question)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
 class AnswersViewSet(viewsets.ModelViewSet):
+  authentication_classes = [TokenAuthentication]
+  permission_classes = [IsAuthenticated]
   queryset=Answers.objects.all()
   serializer_class=AnswersSerializer
 
@@ -52,3 +80,30 @@ class LoginView(APIView):
       return Response({"token": token.key, "user": user_data})
     else:
       return Response({"error": "Wrong Credentials"}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class UserAnswersViewSet(viewsets.ModelViewSet):
+  authentication_classes = [TokenAuthentication]
+  permission_classes = [IsAuthenticated]
+  queryset=UsersAnswers.objects.all()
+  serializer_class=UsersAnswersSerializer
+
+  def get_queryset(self):
+    queryset= super().get_queryset()
+    user_id = self.request.query_params.get('user_id',None)
+
+    if user_id is not None:
+      queryset = queryset.filter(user__id=user_id)
+
+    return queryset
+  
+  def create(self, request):
+      serializer = UsersAnswersSerializer(data=request.data)
+      if serializer.is_valid():
+          try:
+              serializer.save()
+              return Response(serializer.data, status=status.HTTP_201_CREATED)
+          except Exception as e:
+              return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+      else:
+          return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

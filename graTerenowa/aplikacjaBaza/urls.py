@@ -11,6 +11,7 @@ router.register(r'locations', LocationsViewSet)
 
 router.register(r'questions', QuestionsViewSet)
 router.register(r'answers', AnswersViewSet)
+router.register(r'user-answers', UserAnswersViewSet)
 
 
 
